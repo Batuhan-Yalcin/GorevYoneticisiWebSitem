@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(-45deg, #667eea, #764ba2, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            transition: background 0.5s, color 0.5s;
+        }
+        body.dark-mode {
+            background: linear-gradient(-45deg, #2c3e50, #34495e, #4a6fa5, #3a506b);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #ecf0f1;
+        }
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .lists-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .todo-container {
+            width: 350px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideIn 0.5s forwards;
+            transition: background 0.5s, color 0.5s;
+        }
+        body.dark-mode .todo-container {
+            background: rgba(52, 73, 94, 0.7);
+            color: #ecf0f1;
+        }
+        .todo-container:nth-child(even) {
+            animation-delay: 0.2s;
+        }
+        .todo-container:nth-child(odd) {
+            animation-delay: 0.4s;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .completed {
+            text-decoration: line-through;
+            color: rgba(255, 255, 255, 0.3);
+            font-style: italic;
+        }
+        .btn {
+            transition: transform 0.3s ease;
+        }
+        .btn:hover {
+            transform: scale(1.1);
+        }
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .header {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            background: linear-gradient(45deg, #fff, #f8f9fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        .task-date {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-left: 10px;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .list-group-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 8px;
+            border-radius: 8px !important;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .list-group-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            border: none;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+            border: none;
+            color: white;
+        }
+
+        .statistics-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            min-width: 150px;
+        }
+
+        .stat-item i {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .fade-out {
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+        }
+
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .list-group-item {
+            animation: slide-in 0.3s ease forwards;
+        }
+
+        .priority-high {
+            border-left: 4px solid #dc3545 !important;
+        }
+        
+        .priority-medium {
+            border-left: 4px solid #ffc107 !important;
+        }
+        
+        .priority-low {
+            border-left: 4px solid #28a745 !important;
+        }
+        
+        .task-timer {
+            font-size: 0.8rem;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+        
+        .emoji-picker {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .emoji-btn {
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .emoji-btn:hover {
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .achievement {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: all 0.5s;
+            text-align: center;
+        }
+        
+        .achievement.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .achievement i {
+            margin-right: 10px;
+            color: #fff;
+        }
+
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        
+        .task-priority-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-left: 8px;
+        }
+        
+        .weather-widget {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .quote-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .weather-widget {
+            min-width: 150px;
+            transition: all 0.3s ease;
+        }
+        
+        .weather-widget:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+        
+        .weather-info {
+            margin-top: 10px;
+        }
+        
+        .quote-container {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .quote-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .task-tags {
+            display: inline-flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .task-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .pomodoro-timer,
+        .pomodoro-display {
+            display: none;
+        }
+
+        .task-notes {
+            font-size: 0.8rem;
+            margin-top: 5px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+                padding: 0 15px;
+            }
+
+            .todo-container {
+                width: 100%;
+                margin: 10px;
+            }
+
+            .lists-container {
+                padding: 0 10px;
+            }
+
+            .statistics-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .stat-item {
+                padding: 10px;
+                min-width: auto;
+                flex: 1;
+            }
+
+            .stat-number {
+                font-size: 20px;
+            }
+
+            .weather-widget {
+                position: static;
+                margin: 10px auto;
+                width: 90%;
+            }
+
+            .quote-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .dark-mode-toggle,
+            .sound-toggle {
+                top: 10px;
+            }
+
+            .dark-mode-toggle {
+                right: 10px;
+            }
+
+            .sound-toggle {
+                left: 10px;
+            }
+
+            .notification {
+                width: 90%;
+                left: 50%;
+                transform: translateX(-50%) translateY(100px);
+                right: auto;
+            }
+
+            .notification.show {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .achievement {
+                width: 90%;
+                padding: 10px 20px;
+            }
+
+            .list-group-item {
+                flex-direction: column;
+                align-items: flex-start !important;
+            }
+
+            .list-group-item > div:last-child {
+                margin-top: 10px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .task-tags {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                margin: 5px 0;
+            }
+
+            .search-container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .btn {
+                padding: 0.375rem 0.75rem;
+            }
+
+            .task-date {
+                font-size: 0.7rem;
+            }
+
+            .task-timer {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .statistics-container .d-flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stat-item {
+                width: 100%;
+            }
+
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+            }
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            padding: 15px;
+            text-align: center;
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        @media (max-width: 768px) {
+            .footer {
+                margin-top: 30px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dark-mode-toggle">
+        <button class="btn btn-secondary" onclick="toggleDarkMode()">
+            <i class="bi bi-moon"></i>
+        </button>
+    </div>
+    <div class="sound-toggle">
+        <button class="btn btn-secondary" onclick="toggleSound()">
+            <i class="bi bi-volume-up"></i>
+        </button>
+    </div>
+    <div class="header">
+        <h1>Görev Yöneticisi</h1>
+        <p>Görevlerinizi organize edin, hedeflerinize ulaşın!</p>
+    </div>
+    <div class="container">
+        <div class="lists-container" id="listsContainer"></div>
+    </div>
+    <div id="notification" class="notification"></div>
+    <div id="achievement" class="achievement">
+        <i class="bi bi-trophy"></i>
+        <span id="achievementText"></span>
+    </div>
+
+    <div class="weather-widget" id="weatherWidget">
+        <div id="weather">Hava durumu yükleniyor...</div>
+    </div>
+
+    <div class="quote-container" id="quoteContainer">
+        Günlük motivasyon sözü yükleniyor...
+    </div>
+
+    
+    <div class="pomodoro-timer">
+        <h5>Pomodoro Zamanlayıcı</h5>
+        <div class="pomodoro-display" id="pomodoroDisplay">25:00</div>
+        <button class="btn btn-primary btn-sm me-2" onclick="startPomodoro()">Başlat</button>
+        <button class="btn btn-danger btn-sm" onclick="resetPomodoro()">Sıfırla</button>
+    </div>
+
+    <!-- Arama Kutusu -->
+    <div class="search-container">
+        <div class="input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="Görevlerde ara...">
+            <button class="btn btn-primary" onclick="searchTasks()">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 Tüm telif hakları Batuhan Yalçın'a aittir.</p>
+    </footer>
+
+    <script>
+        const categories = ["Yapılacaklar", "Ödevler", "Ders Çalışma", "Alışveriş", "Projeler", "Hatırlatmalar"];
+        
+        function createTodoList(category) {
+            let container = document.createElement("div");
+            container.className = "todo-container mb-4";
+            container.innerHTML = `
+                <h5 class="text-center mb-4">${category}</h5>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" placeholder="Yeni görev ekle..."
+                           onkeypress="if(event.key === 'Enter') addTask(this.nextElementSibling, '${category}')">
+                    <button class="btn btn-primary" onclick="addTask(this, '${category}')">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+                <button class="btn btn-warning mb-3 w-100" onclick="filterTasks(this)">
+                    Tamamlananları Gizle
+                </button>
+                <ul class="list-group"></ul>
+            `;
+            document.getElementById("listsContainer").appendChild(container);
+            loadTasks(category, container);
+        }
+
+        async function addTask(button, category) {
+            let container = button.closest(".todo-container");
+            let taskInput = container.querySelector("input");
+            let taskText = taskInput.value.trim();
+            if (taskText === "") return;
+            
+            const priority = prompt("Görev önceliği seçin (1: Yüksek, 2: Orta, 3: Düşük):", "2");
+            if (!priority) return; 
+            
+            const priorityClass = priority === "1" ? "priority-high" : 
+                                 priority === "2" ? "priority-medium" : "priority-low";
+
+            const taskNote = prompt("Görev için not eklemek ister misiniz?", "") || "";
+            const tags = prompt("Etiketler (virgülle ayırın):", "") || "";
+
+           
+            try {
+                console.log("Gönderilen veri:", {
+                    task_text: taskText,
+                    category: category,
+                    priority: priority,
+                    notes: taskNote,
+                    tags: tags,
+                    status: 'pending'
+                });
+
+                const response = await fetch('save_task.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task_text: taskText,
+                        category: category,
+                        priority: priority,
+                        notes: taskNote,
+                        tags: tags,
+                        status: 'pending'
+                    })
+                });
+
+                const result = await response.json();
+                console.log("Sunucu yanıtı:", result);
+
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+
+                
+                let taskList = container.querySelector("ul");
+                let li = document.createElement("li");
+                li.className = `list-group-item d-flex justify-content-between align-items-center ${priorityClass}`;
+                
+                const emojis = ["🎯", "📌", "💻", "🎨", "🛒", "📝"];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                let tagsHtml = '';
+                if (tags) {
+                    tagsHtml = '<div class="task-tags">' + 
+                        tags.split(',').map(tag => 
+                            `<span class="task-tag">#${tag.trim()}</span>`
+                        ).join('') + 
+                        '</div>';
+                }
+                
+                let noteHtml = '';
+                if (taskNote) {
+                    noteHtml = `<div class="task-notes">📝 ${taskNote}</div>`;
+                }
+
+                li.innerHTML = `
+                    <div>
+                        <span class="task-text">${randomEmoji} ${taskText}</span>
+                        ${tagsHtml}
+                        ${noteHtml}
+                    </div>
+                    <div>
+                        <span class="task-timer">0:00</span>
+                        <span class="task-date">${new Date().toLocaleDateString()}</span>
+                        <button class="btn btn-success btn-sm me-2" onclick="toggleComplete(this, '${category}')">
+                            <i class="bi bi-check"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="removeTask(this, '${category}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>`;
+                
+                taskList.appendChild(li);
+                startTaskTimer(li.querySelector(".task-timer"));
+                saveTasks(category);
+                taskInput.value = "";
+                
+                checkAchievements();
+                showNotification('Görev başarıyla eklendi');
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('Görev eklenirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function removeTask(button, category) {
+            const li = button.closest("li");
+            const taskText = li.querySelector(".task-text").innerText;
+            
+            try {
+                console.log("Silme isteği gönderiliyor:", {
+                    task_text: taskText,
+                    category: category
+                });
+
+                const response = await fetch('delete_task.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        task_text: taskText,
+                        category: category
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const responseText = await response.text();
+                console.log("Sunucu yanıtı (text):", responseText);
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error('Sunucudan geçersiz JSON yanıtı: ' + responseText);
+                }
+
+                console.log("Sunucu yanıtı (parsed):", result);
+
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+
+                // UI'dan görevi kaldır
+                li.classList.add('fade-out');
+                playSound(deleteSound);
+                
+                setTimeout(() => {
+                    li.remove();
+                    saveTasks(category);
+                    updateStatistics();
+                    showNotification('Görev silindi');
+                }, 300);
+
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('Görev silinirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        function toggleComplete(button, category) {
+            const li = button.closest("li");
+            const taskText = li.querySelector(".task-text");
+            const timerElement = li.querySelector(".task-timer");
+            
+           
+            if (!taskText.classList.contains("completed")) {
+                
+                timerElement.dataset.stopped = "true";
+                showNotification(`Görev tamamlandı: ${taskText.innerText}`);
+                playSound(successSound);
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else {
+               
+                delete timerElement.dataset.stopped;
+            }
+            
+            taskText.classList.toggle("completed");
+            saveTasks(category);
+            updateStatistics();
+        }
+
+        function saveTasks(category) {
+            let container = [...document.querySelectorAll(".todo-container")].find(c => c.querySelector("h5").textContent === category);
+            let tasks = [];
+            container.querySelectorAll("li").forEach(li => {
+                tasks.push({
+                    text: li.querySelector(".task-text").innerText,
+                    completed: li.querySelector(".task-text").classList.contains("completed"),
+                    date: li.querySelector(".task-date").innerText
+                });
+            });
+            localStorage.setItem(category, JSON.stringify(tasks));
+        }
+
+        async function loadTasks(category, container) {
+            try {
+                const response = await fetch(`get_tasks.php?category=${encodeURIComponent(category)}`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.message);
+                }
+
+                let taskList = container.querySelector("ul");
+                result.tasks.forEach(task => {
+                    let li = document.createElement("li");
+                    const priorityClass = task.priority === "1" ? "priority-high" : 
+                                        task.priority === "2" ? "priority-medium" : "priority-low";
+                    
+                    li.className = `list-group-item d-flex justify-content-between align-items-center ${priorityClass}`;
+                    
+                    let tagsHtml = '';
+                    if (task.tags) {
+                        tagsHtml = '<div class="task-tags">' + 
+                            task.tags.split(',').map(tag => 
+                                `<span class="task-tag">#${tag.trim()}</span>`
+                            ).join('') + 
+                            '</div>';
+                    }
+                    
+                    let noteHtml = '';
+                    if (task.notes) {
+                        noteHtml = `<div class="task-notes">📝 ${task.notes}</div>`;
+                    }
+
+                    li.innerHTML = `
+                        <div>
+                            <span class="task-text">${task.task_text}</span>
+                            ${tagsHtml}
+                            ${noteHtml}
+                        </div>
+                        <div>
+                            <span class="task-timer">0:00</span>
+                            <span class="task-date">${new Date(task.created_at).toLocaleDateString()}</span>
+                            <button class="btn btn-success btn-sm me-2" onclick="toggleComplete(this, '${category}')">
+                                <i class="bi bi-check"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="removeTask(this, '${category}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>`;
+                    taskList.appendChild(li);
+
+                   
+                    if (task.status === 'completed') {
+                        li.querySelector(".task-text").classList.add("completed");
+                        li.querySelector(".task-timer").dataset.stopped = "true";
+                    } else {
+                        startTaskTimer(li.querySelector(".task-timer"));
+                    }
+                });
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('Görevler yüklenirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        function filterTasks(button) {
+            const container = button.closest(".todo-container");
+            const taskList = container.querySelector("ul");
+            const completedTasks = taskList.querySelectorAll("li .completed");
+            
+            completedTasks.forEach(task => {
+                const li = task.closest("li");
+                li.style.display = "none";
+                li.classList.add("filtered");
+            });
+
+            button.innerHTML = `
+                <i class="bi bi-eye"></i> Tamamlananları Göster
+                <span class="badge bg-light text-dark ms-2">${completedTasks.length}</span>
+            `;
+            
+            button.onclick = () => showCompletedTasks(button);
+        }
+
+        function showCompletedTasks(button) {
+            const container = button.closest(".todo-container");
+            const taskList = container.querySelector("ul");
+            const filteredTasks = taskList.querySelectorAll("li.filtered");
+            
+            filteredTasks.forEach(li => {
+                li.style.display = "flex";
+                li.classList.remove("filtered");
+            });
+
+            button.innerHTML = `
+                <i class="bi bi-eye-slash"></i> Tamamlananları Gizle
+                <span class="badge bg-light text-dark ms-2">${filteredTasks.length}</span>
+            `;
+            
+            button.onclick = () => filterTasks(button);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateStatistics() {
+            const stats = {
+                total: 0,
+                completed: 0,
+                pending: 0
+            };
+
+            categories.forEach(category => {
+                const tasks = JSON.parse(localStorage.getItem(category)) || [];
+                stats.total += tasks.length;
+                stats.completed += tasks.filter(task => task.completed).length;
+            });
+            stats.pending = stats.total - stats.completed;
+
+            const statsHtml = `
+                <div class="statistics-container mb-4 text-center">
+                    <h3 class="mb-3">İstatistikler</h3>
+                    <div class="d-flex justify-content-center gap-4">
+                        <div class="stat-item">
+                            <i class="bi bi-list-task"></i>
+                            <div>Toplam Görev</div>
+                            <div class="stat-number">${stats.total}</div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="bi bi-check2-circle"></i>
+                            <div>Tamamlanan</div>
+                            <div class="stat-number">${stats.completed}</div>
+                        </div>
+                        <div class="stat-item">
+                            <i class="bi bi-hourglass-split"></i>
+                            <div>Bekleyen</div>
+                            <div class="stat-number">${stats.pending}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const statsContainer = document.getElementById('statisticsContainer');
+            statsContainer.innerHTML = statsHtml;
+        }
+
+        function startTaskTimer(timerElement) {
+            let seconds = 0;
+            const timer = setInterval(() => {
+               
+                if (timerElement.dataset.stopped === "true") {
+                    clearInterval(timer);
+                    return;
+                }
+                
+                seconds++;
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                timerElement.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }, 1000);
+            
+           
+            timerElement.dataset.timerId = timer;
+        }
+
+        function checkAchievements() {
+            const totalTasks = document.querySelectorAll('.list-group-item').length;
+            const completedTasks = document.querySelectorAll('.completed').length;
+            
+            const achievements = [
+                { count: 5, message: "🌟 İlk 5 görev tamamlandı!" },
+                { count: 10, message: "🏆 10 görev başarısı!" },
+                { count: 20, message: "👑 Görev ustası oldunuz!" },
+                { count: 50, message: "🎯 50 görev tamamlandı!" }
+            ];
+            
+            achievements.forEach(achievement => {
+                if (completedTasks === achievement.count) {
+                    showAchievement(achievement.message);
+                }
+            });
+        }
+
+        function showAchievement(message) {
+            const achievement = document.getElementById('achievement');
+            const achievementText = document.getElementById('achievementText');
+            achievementText.textContent = message;
+            achievement.classList.add('show');
+            
+            playSound(achievementSound);
+            confetti({
+                particleCount: 150,
+                spread: 180,
+                origin: { y: 0.3 }
+            });
+            
+            setTimeout(() => {
+                achievement.classList.remove('show');
+            }, 5000);
+        }
+
+        let soundEnabled = true;
+        const successSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        const achievementSound = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
+        const deleteSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2947/2947-preview.mp3');
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.querySelector('.sound-toggle i');
+            icon.className = soundEnabled ? 'bi bi-volume-up' : 'bi bi-volume-mute';
+        }
+
+        function playSound(sound) {
+            if (soundEnabled) {
+                sound.volume = 0.3;
+                sound.currentTime = 0;
+                sound.play().catch(err => console.log('Ses çalınamadı:', err));
+            }
+        }
+
+        const quotes = [
+            "Başarı, her gün küçük adımlar atmaktır.",
+            "Bugün dünden daha iyi olacak!",
+            "Her görev, hedeflerine giden yolda bir adımdır.",
+            "Küçük ilerlemeler, büyük başarıların temelidir.",
+            "Yapabildiğinin en iyisini yap, gerisi gelecek!",
+            "Her başarı, küçük bir adımla başlar.",
+            "Planlı çalışmak, başarının anahtarıdır.",
+            "Bugün yapılan işi yarına bırakma!",
+            "Hedeflerine ulaşmak için her gün çaba göster.",
+            "Başarı, disiplinli çalışmanın sonucudur."
+        ];
+
+        function updateQuote() {
+            const quoteContainer = document.getElementById('quoteContainer');
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            quoteContainer.innerHTML = `"${randomQuote}"`;
+        }
+
+        async function getWeather() {
+            try {
+                const weatherWidget = document.getElementById('weather');
+                const now = new Date();
+                const hour = now.getHours();
+                let weatherIcon = hour >= 6 && hour < 20 ? "bi-sun" : "bi-moon-stars";
+                
+                weatherWidget.innerHTML = `
+                    <i class="bi ${weatherIcon} fs-3 mb-2"></i>
+                    <div class="weather-info">
+                        <div class="fs-4 mb-1">İstanbul</div>
+                        <div class="text-warning">${Math.floor(15 + Math.random() * 10)}°C</div>
+                        <div class="text-light-emphasis">${hour >= 6 && hour < 20 ? 'Güneşli' : 'Açık'}</div>
+                    </div>
+                `;
+            } catch (error) {
+                console.log('Hava durumu yüklenemedi');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const statsDiv = document.createElement('div');
+            statsDiv.id = 'statisticsContainer';
+            document.querySelector('.header').after(statsDiv);
+
+            categories.forEach(category => createTodoList(category));
+            updateStatistics();
+            
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark-mode");
+            }
+
+            updateQuote();
+            getWeather();
+            
+            setInterval(updateQuote, 3600000);
+            setInterval(getWeather, 1800000);
+
+            document.getElementById('quoteContainer').addEventListener('click', updateQuote);
+
+            
+            function searchTasks() {
+                const searchText = document.getElementById('searchInput').value.toLowerCase();
+                const allTasks = document.querySelectorAll('.list-group-item');
+                let foundCount = 0;
+                
+                allTasks.forEach(task => {
+                    const taskText = task.querySelector('.task-text').textContent.toLowerCase();
+                    const taskNotes = task.querySelector('.task-notes')?.textContent.toLowerCase() || '';
+                    const taskTags = task.querySelector('.task-tags')?.textContent.toLowerCase() || '';
+                    
+                    const isVisible = taskText.includes(searchText) || 
+                                    taskNotes.includes(searchText) || 
+                                    taskTags.includes(searchText);
+                    
+                    task.style.display = isVisible ? 'flex' : 'none';
+                    
+                    if (isVisible) {
+                        task.style.animation = 'slide-in 0.3s ease forwards';
+                        foundCount++;
+                    }
+                });
+
+                
+                if (searchText.length > 0) {
+                    if (foundCount > 0) {
+                        showNotification(`${foundCount} görev bulundu`);
+                    } else {
+                        showNotification('Görev bulunamadı');
+                    }
+                }
+            }
+
+            
+            const searchInput = document.getElementById('searchInput');
+            
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchTasks();
+                }
+            });
+
+           
+            let searchTimeout;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(searchTasks, 300);
+            });
+
+         
+            searchInput.addEventListener('focus', () => {
+                searchInput.placeholder = 'Görev adı, not veya etiket ile arayın...';
+            });
+
+            searchInput.addEventListener('blur', () => {
+                searchInput.placeholder = 'Görevlerde ara...';
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+</body>
+</html>
