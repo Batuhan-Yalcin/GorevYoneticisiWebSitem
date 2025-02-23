@@ -17,6 +17,9 @@ try {
         throw new Exception('JSON verisi çözümlenemedi');
     }
 
+    if (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('Geçerli bir email adresi gerekli');
+    }
 
     $task_text = $data['task_text'];
     $category = $data['category'];
@@ -24,10 +27,12 @@ try {
     $notes = $data['notes'];
     $tags = $data['tags'];
     $status = $data['status'];
+    $email = $data['email'];
+    $reminder_time = $data['reminder_time'];
     $created_at = date('Y-m-d H:i:s');
 
-    $sql = "INSERT INTO tasks (task_text, category, priority, notes, tags, status, created_at) 
-            VALUES (:task_text, :category, :priority, :notes, :tags, :status, :created_at)";
+    $sql = "INSERT INTO tasks (task_text, category, priority, notes, tags, status, email, reminder_time, created_at) 
+            VALUES (:task_text, :category, :priority, :notes, :tags, :status, :email, :reminder_time, :created_at)";
     
     $stmt = $db->prepare($sql);
     
@@ -38,6 +43,8 @@ try {
     $stmt->bindParam(':notes', $notes);
     $stmt->bindParam(':tags', $tags);
     $stmt->bindParam(':status', $status);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':reminder_time', $reminder_time);
     $stmt->bindParam(':created_at', $created_at);
 
   

@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List</title>
+    <title>Görev Yöneticisi,Görevlerinizi organize edin,hedeflerinize ulaşın!,İstatistikler,Yapılacaklar,Ödevler,Ders Çalışma,Alışveriş,Projeler,Hatırlatmalar,Yapacağın işleri planla, Görevlerini Yönet,Görevlerinizi Organize edin,Yapacağınız işleri planlayın,Hedeflerinize ulaşın,to do list sitesi, to do list uygulaması, to do list app
+    </title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             background: linear-gradient(-45deg, #667eea, #764ba2, #23a6d5, #23d5ab);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientBG 7s ease infinite;
             color: white;
             font-family: 'Arial', sans-serif;
-            transition: background 0.5s, color 0.5s;
+            transition: background 0.5s, color 0.1s;
         }
         body.dark-mode {
-            background: linear-gradient(-45deg, #2c3e50, #34495e, #4a6fa5, #3a506b);
+            background: linear-gradient(-45deg, #2c3e50, #34495e, #293e5e, #3a506b);
             background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            animation: gradientBG 7s ease infinite;
             color: #ecf0f1;
         }
         @keyframes gradientBG {
@@ -518,8 +519,44 @@
             }
         }
     </style>
+    </style>
 </head>
 <body>
+    <!-- Müzik Ses Kontrolü -->
+    <audio id="backgroundMusic" loop>
+        <source src="muzik.mp3" type="audio/mpeg">
+        Tarayıcınız audio etiketini desteklemiyor.
+    </audio>
+
+    <!-- Ses Kontrolü -->
+    <div class="sound-toggle">
+        <button class="btn btn-secondary" onclick="toggleSound()">
+            <i class="bi bi-volume-up"></i>   --Müzik Çalması için İçin Tıkla
+        </button>
+    </div>
+
+    <script>
+        // Ses açma / kapama fonksiyonu
+        function toggleSound() {
+            var audio = document.getElementById("backgroundMusic");
+            // Ses duruyorsa çalmaya başla, çalıyorsa durdur
+            if (audio.paused) {
+                audio.play();  // Ses çalmaya başlar
+            } else {
+                audio.pause();  // Ses durur
+            }
+        }
+
+        // Sayfa yüklendikten sonra, sesin başlatılması için butona tıklanmasını sağla
+        window.onload = function () {
+            var audio = document.getElementById("backgroundMusic");
+            // Tarayıcı otomatik başlatmaya izin vermiyorsa, sesin çalmasını başlatmak için kullanıcı etkileşimi gereklidir
+            document.querySelector('.sound-toggle button').onclick = function() {
+                audio.play();  // Ses başlatılır
+            }
+        };
+    </script>
+
     <div class="dark-mode-toggle">
         <button class="btn btn-secondary" onclick="toggleDarkMode()">
             <i class="bi bi-moon"></i>
@@ -533,6 +570,15 @@
     <div class="header">
         <h1>Görev Yöneticisi</h1>
         <p>Görevlerinizi organize edin, hedeflerinize ulaşın!</p>
+    </div>
+      <!-- Arama Kutusu -->
+      <div class="search-container">
+        <div class="input-group">
+            <input type="text" class="form-control" id="searchInput" placeholder="Görevlerde ara...">
+            <button class="btn btn-primary" onclick="searchTasks()">
+                <i class="bi bi-search"></i>
+            </button>
+        </div>
     </div>
     <div class="container">
         <div class="lists-container" id="listsContainer"></div>
@@ -558,17 +604,6 @@
         <button class="btn btn-primary btn-sm me-2" onclick="startPomodoro()">Başlat</button>
         <button class="btn btn-danger btn-sm" onclick="resetPomodoro()">Sıfırla</button>
     </div>
-
-    <!-- Arama Kutusu -->
-    <div class="search-container">
-        <div class="input-group">
-            <input type="text" class="form-control" id="searchInput" placeholder="Görevlerde ara...">
-            <button class="btn btn-primary" onclick="searchTasks()">
-                <i class="bi bi-search"></i>
-            </button>
-        </div>
-    </div>
-
     <footer class="footer">
         <p>© 2025 Tüm telif hakları Batuhan Yalçın'a aittir.</p>
     </footer>
@@ -603,26 +638,50 @@
             let taskText = taskInput.value.trim();
             if (taskText === "") return;
             
-            const priority = prompt("Görev önceliği seçin (1: Yüksek, 2: Orta, 3: Düşük):", "2");
-            if (!priority) return; 
+            // Email adresi kontrolü
+            let email = localStorage.getItem('user_email');
+            if (!email || email === 'null' || email === 'undefined') {  // Kontrol güçlendirildi
+                email = prompt("Lütfen email adresinizi girin:", "");
+                if (!email || !email.includes('@')) {
+                    showNotification('Geçerli bir email adresi giriniz');
+                    return;
+                }
+                localStorage.setItem('user_email', email);
+            }
+
+            // Email doğruluğundan emin olmak için tekrar kontrol
+            if (!email || !email.includes('@')) {
+                showNotification('Geçerli bir email adresi giriniz');
+                return;
+            }
             
+            // Süre seçimi
+            const hours = prompt("Kaç saat sonra hatırlatılsın? (0-24):", "0");
+            if (hours === null || hours < 0 || hours > 24) return;
+            
+            const minutes = prompt("Kaç dakika sonra hatırlatılsın? (0-59):", "5");
+            if (minutes === null || minutes < 0 || minutes > 59) return;
+            
+            const reminderTime = new Date();
+            reminderTime.setHours(reminderTime.getHours() + parseInt(hours));
+            reminderTime.setMinutes(reminderTime.getMinutes() + parseInt(minutes));
+            
+            // Eğer seçilen süre şimdiden küçükse uyarı ver
+            if (reminderTime <= new Date()) {
+                showNotification('Geçerli bir hatırlatma süresi seçin');
+                return;
+            }
+
+            const priority = prompt("Görev önceliği seçin (1: Yüksek, 2: Orta, 3: Düşük):", "2");
+            if (!priority) return;
+
             const priorityClass = priority === "1" ? "priority-high" : 
                                  priority === "2" ? "priority-medium" : "priority-low";
 
-            const taskNote = prompt("Görev için not eklemek ister misiniz?", "") || "";
-            const tags = prompt("Etiketler (virgülle ayırın):", "") || "";
+            const taskNote = prompt("Görev için not eklemek ister misiniz?", "");
+            const tags = prompt("Etiketler (virgülle ayırın):", "");
 
-           
             try {
-                console.log("Gönderilen veri:", {
-                    task_text: taskText,
-                    category: category,
-                    priority: priority,
-                    notes: taskNote,
-                    tags: tags,
-                    status: 'pending'
-                });
-
                 const response = await fetch('save_task.php', {
                     method: 'POST',
                     headers: {
@@ -634,7 +693,9 @@
                         priority: priority,
                         notes: taskNote,
                         tags: tags,
-                        status: 'pending'
+                        status: 'pending',
+                        email: email,
+                        reminder_time: reminderTime.toISOString()
                     })
                 });
 
@@ -694,6 +755,52 @@
             } catch (error) {
                 console.error('Hata:', error);
                 showNotification('Görev eklenirken bir hata oluştu: ' + error.message);
+            }
+        }
+
+        async function verifyPhone(phoneNumber) {
+            try {
+                // Doğrulama kodu gönder
+                const response = await fetch('verify_phone.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phone_number: phoneNumber })
+                });
+                
+                const result = await response.json();
+                if (!result.success) throw new Error(result.message);
+                
+                // Kullanıcıdan kodu al
+                const code = prompt("Telefonunuza gönderilen 6 haneli kodu girin:", "");
+                if (!code) return false;
+                
+                // Kodu doğrula
+                const verifyResponse = await fetch('check_verification.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        phone_number: phoneNumber,
+                        code: code
+                    })
+                });
+                
+                const verifyResult = await verifyResponse.json();
+                if (verifyResult.success) {
+                    localStorage.setItem('verified_phone', phoneNumber);
+                    showNotification('Telefon numarası doğrulandı!');
+                    return true;
+                } else {
+                    showNotification('Doğrulama başarısız: ' + verifyResult.message);
+                    return false;
+                }
+                
+            } catch (error) {
+                showNotification('Doğrulama hatası: ' + error.message);
+                return false;
             }
         }
 
@@ -1139,9 +1246,32 @@
             searchInput.addEventListener('blur', () => {
                 searchInput.placeholder = 'Görevlerde ara...';
             });
+
+            // Email adresini sıfırla (test için)
+            localStorage.removeItem('user_email');
+            
+            function checkReminders() {
+                $.ajax({
+                    url: 'send_reminders.php',
+                    method: 'GET',
+                    success: function(response) {
+                        console.log('Hatırlatmalar kontrol edildi:', response);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Hatırlatma kontrolü hatası:', error);
+                    }
+                });
+            }
+            
+
+            // Sayfa yüklendiğinde ilk kontrolü yap
+            checkReminders();
+
+            // Her 5 dakikada bir kontrol et
+            setInterval(checkReminders, 120000);
         });
     </script>
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 </body>
 </html>

@@ -7,6 +7,9 @@ define('DB_NAME', 'todo_app');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
+// Geliştirme modu - SMS'leri gerçekten göndermek yerine loglayacak
+define('DEVELOPMENT_MODE', false);
+
 try {
     $db = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
